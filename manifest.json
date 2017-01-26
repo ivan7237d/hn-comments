@@ -1,6 +1,6 @@
 {
   "name": "Y-Combinator Hacker News Comments",
-  "version": "1.2",
+  "version": "1.3",
   "description": "Show Hacker News comments for current tab.",
   "manifest_version": 2,
   "background": {

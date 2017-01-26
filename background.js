@@ -37,11 +37,7 @@ const getHNComments = async url => {
   }
 };
 
-chrome.tabs.onUpdated.addListener(async(tabId, changeInfo, tab) => {
-  let url = changeInfo.url;
-  if (!url) {
-    return;
-  }
+const updateTab = async(tabId, url) => {
   delete commentUrls[tabId];
   chrome.browserAction.setBadgeText({text: '', tabId});
   chrome.browserAction.setTitle({title: 'Checking for HN comments...', tabId});
@@ -58,6 +54,23 @@ chrome.tabs.onUpdated.addListener(async(tabId, changeInfo, tab) => {
       {title: 'Click to open HN comments in a new tab.', tabId});
   commentUrls[tabId] =
       `https://news.ycombinator.com/item?id=${comments.objectID}`;
+};
+
+chrome.tabs.onUpdated.addListener(async(tabId, changeInfo, tab) => {
+  let url = changeInfo.url;
+  if (!url) {
+    return;
+  }
+  await updateTab(tabId, url);
+});
+
+chrome.runtime.onInstalled.addListener(async details => {
+  if (new Set(['install', 'update']).has(details.reason)) {
+    chrome.tabs.query(
+        {},
+        async tabs =>
+            await Promise.all(tabs.map(tab => updateTab(tab.id, tab.url))));
+  }
 });
 
 chrome.browserAction.onClicked.addListener(async currentTab => {
